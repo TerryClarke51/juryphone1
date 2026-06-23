@@ -5,43 +5,87 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Session 1: Law, Morality, and Conscience</title>
     <style>
-        body { margin:0; padding:0; font-family: system-ui; background:#f3f4f6; }
-        .slide-viewer { min-height: 70vh; background:#111; display:flex; align-items:center; justify-content:center; }
-        .slide-img { max-width:95%; max-height:95%; }
-        .controls { padding:15px; display:flex; justify-content:space-between; background:white; }
-        .btn { padding:12px 20px; font-size:16px; border-radius:8px; }
+        :root { --primary: #1e3a8a; }
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: system-ui, sans-serif;
+            margin: 0;
+            padding: 8px;
+            background: #f3f4f6;
+            min-height: 100dvh;
+        }
+
+        .app-container {
+            max-width: 960px;
+            margin: auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            overflow: hidden;
+            height: calc(100dvh - 16px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .slide-viewer {
+            flex: 1;
+            background: #111;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            position: relative;
+        }
+
+        .slide-img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .controls {
+            padding: 12px;
+            background: #f9fafb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
     </style>
 </head>
 <body>
+<div class="app-container">
+    <div class="slide-viewer">
+        <img id="slideImg" class="slide-img" alt="Slide">
+    </div>
 
-<div class="slide-viewer">
-    <img id="slideImg" class="slide-img" alt="Slide">
-</div>
-
-<div class="controls">
-    <button onclick="changeSlide(-1)" class="btn">Back</button>
-    <span id="slideNum">Slide 1 / 8</span>
-    <button onclick="changeSlide(1)" class="btn">Next</button>
+    <div class="controls">
+        <button class="btn btn-primary" onclick="changeSlide(-1)">Back</button>
+        <span id="slideNum" style="font-weight:600;">Slide 1 / 8</span>
+        <button class="btn btn-primary" onclick="changeSlide(1)">Next</button>
+    </div>
 </div>
 
 <script>
     let currentSlide = 1;
     const totalSlides = 8;
 
-    const slideUrls = {
-        1: "https://drive.google.com/uc?id=1lfJr5iJdlB9JoIGMGhI4JqYc8qePKS-L",
-        2: "https://drive.google.com/uc?id=1ghPSguwjettQwgzzFs-DRhnfMleOlMj5",
-        3: "https://drive.google.com/uc?id=1HSrsHVfC_CApk_8bdS8sfgEfJSzmZ1h9",
-        4: "https://drive.google.com/uc?id=1QsyU8LPmJdIrMFPQ4ntInXg4Gg_YRKL9",
-        5: "https://drive.google.com/uc?id=1ER6OKyb855zE3TCznUF2hZDpCmipoZut",
-        6: "https://drive.google.com/uc?id=10WE1iqoKGD1JR_yCgg-Benc1YuMR0J8E",
-        7: "https://drive.google.com/uc?id=13Cf3ExjJ7wtZ4wmQ_SJvpHrKCrAfBvFq",
-        8: "https://drive.google.com/uc?id=1DdPsxGukqE6Ak17qalm_jnHQDK5Lpe42"
-    };
-
     function updateUI() {
-        document.getElementById('slideNum').innerText = `Slide ${currentSlide} / ${totalSlides}`;
-        document.getElementById('slideImg').src = slideUrls[currentSlide];
+        document.getElementById('slideNum').textContent = `Slide ${currentSlide} / ${totalSlides}`;
+        const img = document.getElementById('slideImg');
+        img.src = `Slide${currentSlide}.JPG`;   // Try .JPG first
     }
 
     function changeSlide(dir) {
