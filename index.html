@@ -133,7 +133,16 @@
     let currentSlide = 1;
     const totalSlides = 8;
 
-    const speakerNotes = { /* your notes */ 1: "...", /* ... */ 8: "..." };
+    const speakerNotes = {
+        1: "This presentation explores a long-running legal debate...",
+        2: "The central disagreement is not between lawyers...",
+        3: "From the perspective of state lawyers...",
+        4: "Civil liberties advocates argue the direct opposite...",
+        5: "Regardless of all this legal theory...",
+        6: "This is the core of the issue...",
+        7: "This debate is not new...",
+        8: "The conclusion is, that this is not a legal answer, but a constitutional dilemma..."
+    };
 
     let audioPlayed = {};
 
@@ -148,7 +157,31 @@
     }
 
     function speakNotes() {
-        // ... (same as before)
+        const btn = document.getElementById('audioBtn');
+        const text = speakerNotes[currentSlide];
+        if (!text) return;
+
+        window.speechSynthesis.cancel();
+        btn.disabled = true;
+        btn.textContent = "🔊 Speaking...";
+
+        const sentences = text.match(/[^.!?]+[.!?]+(?:\s|$)/g) || [text];
+        let index = 0;
+
+        const speakNext = () => {
+            if (index >= sentences.length) {
+                audioPlayed[currentSlide] = true;
+                btn.textContent = "🔊 Replay Audio";
+                btn.disabled = false;
+                return;
+            }
+            const u = new SpeechSynthesisUtterance(sentences[index].trim());
+            u.rate = 0.94;
+            u.onend = () => { index++; speakNext(); };
+            u.onerror = () => { btn.disabled = false; btn.textContent = "🔊 Play Audio"; };
+            window.speechSynthesis.speak(u);
+        };
+        speakNext();
     }
 
     function changeSlide(dir) {
@@ -167,7 +200,7 @@
         updateUI();
     }
 
-    // ============= QUIZ =============
+    // Quiz
     const quizQuestions = [
         { q: "1. Is 'jury nullification' officially recognised as a formal legal right?", correct: false },
         { q: "2. Do jury deliberations take place in secret?", correct: true },
@@ -194,19 +227,18 @@
             const block = document.createElement('div');
             block.className = 'question-block';
             block.innerHTML = `<div style="font-weight:600; margin-bottom:12px;">${q.q}</div>`;
-            
-            const yesBtn = document.createElement('button');
-            yesBtn.className = 'option-btn';
-            yesBtn.textContent = 'Yes ✓';
-            yesBtn.onclick = () => selectAnswer(i, true, yesBtn, block);
 
-            const noBtn = document.createElement('button');
-            noBtn.className = 'option-btn';
-            noBtn.textContent = 'No ✕';
-            noBtn.onclick = () => selectAnswer(i, false, noBtn, block);
+            const yes = document.createElement('button');
+            yes.className = 'option-btn';
+            yes.textContent = 'Yes ✓';
+            yes.onclick = () => selectAnswer(i, true, yes, block);
 
-            block.appendChild(yesBtn);
-            block.appendChild(noBtn);
+            const no = document.createElement('button');
+            no.className = 'option-btn';
+            no.textContent = 'No ✕';
+            no.onclick = () => selectAnswer(i, false, no, block);
+
+            block.append(yes, no);
             container.appendChild(block);
         });
 
@@ -228,7 +260,7 @@
 
     function submitQuiz() {
         if (quizAnswers.some(a => a === null)) {
-            alert("Please answer all questions before submitting.");
+            alert("Please answer all questions.");
             return;
         }
 
@@ -241,17 +273,17 @@
             const block = container.children[i];
             const buttons = block.querySelectorAll('.option-btn');
             buttons.forEach(btn => {
-                const val = btn.textContent.includes('Yes');
-                if (val === q.correct) btn.classList.add('correct');
-                else if (val === quizAnswers[i]) btn.classList.add('wrong');
+                const isYes = btn.textContent.includes('Yes');
+                if (isYes === q.correct) btn.classList.add('correct');
+                else if (isYes === quizAnswers[i]) btn.classList.add('wrong');
             });
         });
 
         const result = document.createElement('div');
-        result.style.textAlign = "center";
-        result.style.margin = "25px 0";
-        result.style.fontSize = "1.4rem";
-        result.innerHTML = score === 6 ? "🎉 Perfect Score! Excellent work!" : `You scored ${score}/6`;
+        result.style.textAlign = 'center';
+        result.style.margin = '25px 0';
+        result.style.fontSize = '1.4rem';
+        result.innerHTML = score === 6 ? '🎉 Perfect Score!' : `You scored ${score}/6`;
         container.appendChild(result);
     }
 
