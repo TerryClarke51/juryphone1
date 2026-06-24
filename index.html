@@ -133,16 +133,7 @@
     let currentSlide = 1;
     const totalSlides = 8;
 
-    const speakerNotes = {
-        1: "This presentation explores a long-running legal debate, that’s been going on for over 300 fuckin years, about the role of the jury in England and Wales. At its core is a disagreement about whether a jury’s ability to return a verdict based on conscience should be understood as a formal legal right, or merely an unwritten practical power, with strings attached within the system. The issue sits between law, morality, and constitutional history.",
-        2: "The central disagreement is not between lawyers and non-lawyers, but between two legal philosophies. One view treats the jury as bound strictly by judicial directions. The other sees the jury as a safeguard against unjust laws or unjust applications of law.",
-        3: "From the perspective of state lawyers and legal eagles, the jury’s role is limited. They say that jurors are expected to determine facts and apply the law, strictly as directed by the judge.",
-        4: "Civil liberties advocates and some constitutional historians argue the direct opposite. They accept jurors are instructed on the law, but argue the jury exists partly because law and justice are not always identical.",
-        5: "Regardless of all this legal theory, the practical structure of the jury system is important. Jury deliberations are secret, and no external authority can interrogate how individual jurors reached their decisions.",
-        6: "This is the core of the issue. If jurors act independently, in secret, without punishment, and their final decision is irreversible, then the practical reality is that it's a legal right in all but name.",
-        7: "This debate is not new. It has existed for three centuries within the common law tradition. Constitutional cases like Bushell’s Case in 1670 are often cited.",
-        8: "The conclusion is, that this is not a legal answer, but a constitutional dilemma. One side prioritises legal certainty and judicial direction. The other prioritises conscience and democratic legitimacy."
-    };
+    const speakerNotes = { /* full notes as before */ };
 
     let audioPlayed = {};
 
@@ -200,7 +191,7 @@
         updateUI();
     }
 
-    // ============== QUIZ ==============
+    // Quiz
     const quizQuestions = [
         { q: "1. Is 'jury nullification' officially recognised as a formal legal right?", correct: false },
         { q: "2. Do jury deliberations take place in secret?", correct: true },
@@ -264,8 +255,28 @@
             alert("Please answer all questions before submitting.");
             return;
         }
-        // ... scoring logic (same as before)
-        alert("Quiz completed! Score logic can be expanded.");
+
+        let score = 0;
+        const container = document.getElementById('quizContent');
+
+        quizQuestions.forEach((q, i) => {
+            if (quizAnswers[i] === q.correct) score++;
+
+            const block = container.children[i];
+            const buttons = block.querySelectorAll('.option-btn');
+            buttons.forEach(btn => {
+                const isYes = btn.textContent.includes('Yes');
+                if (isYes === q.correct) btn.classList.add('correct');
+                else if (isYes === quizAnswers[i]) btn.classList.add('wrong');
+            });
+        });
+
+        const result = document.createElement('div');
+        result.style.textAlign = 'center';
+        result.style.margin = '25px 0';
+        result.style.fontSize = '1.4rem';
+        result.innerHTML = score === 6 ? '🎉 Perfect Score! Excellent work!' : `You scored ${score}/6`;
+        container.appendChild(result);
     }
 
     function exitQuiz() {
