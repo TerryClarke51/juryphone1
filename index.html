@@ -45,7 +45,7 @@
             object-fit: contain;
         }
 
-        .quiz-container {
+        .quiz-container, .completion-screen {
             position: absolute;
             inset: 0;
             background: #e2f0d9;
@@ -55,14 +55,11 @@
         }
 
         .completion-screen {
-            flex: 1;
-            display: none;
+            background: linear-gradient(135deg, #e0f2fe, #f0fdf4);
             flex-direction: column;
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 40px 20px;
-            background: linear-gradient(135deg, #e0f2fe, #f0fdf4);
         }
 
         .question-block {
@@ -124,10 +121,13 @@
         </div>
 
         <div id="completionScreen" class="completion-screen">
-            <h1 style="color:#1e3a8a; font-size:2.4rem;">🎉 Well Done!</h1>
-            <p style="font-size:1.4rem; margin:20px 0;">You have successfully completed</p>
-            <p style="font-size:1.3rem; font-weight:600;">Session 1: Law, Morality, and Conscience</p>
-            <button class="btn btn-restart" onclick="restartPresentation()" style="margin-top:30px;">↺ Restart Presentation</button>
+            <h1 id="completionTitle" style="color:#1e3a8a; font-size:2.2rem;">Quiz Completed</h1>
+            <p id="scoreDisplay" style="font-size:1.6rem; margin:20px 0; font-weight:600;"></p>
+            <div style="margin-top:30px; display:flex; flex-direction:column; gap:12px; width:100%; max-width:300px;">
+                <button class="btn btn-restart" onclick="restartPresentation()">↺ Restart Presentation</button>
+                <button class="btn btn-restart" onclick="restartQuiz()">Restart Quiz</button>
+                <button class="btn btn-primary" onclick="closePresentation()">Finish</button>
+            </div>
         </div>
     </div>
 
@@ -151,15 +151,13 @@
     const totalSlides = 8;
     let isInQuiz = false;
     let isSpeaking = false;
-    let currentUtteranceIndex = 0;
-    let currentSentences = [];
 
     const speakerNotes = {
         1: "This presentation explores a long-running legal debate, that’s been going on for over 300 fuckin years, about the role of the jury in England and Wales. At its core is a disagreement about whether a jury’s ability to return a verdict based on conscience should be understood as a formal legal right, or merely an unwritten practical power, with strings attached within the system. The issue sits between law, morality, and constitutional history. As of now, theres no absolute on how this issue should be dealt with, and both sides are still arguing the toss.",
-        2: "The central disagreement is not between lawyers and non-lawyers, but between two legal philosophies. One view treats the jury as bound strictly by judicial directions. The other sees the jury as a safeguard against unjust laws or unjust applications of law. Both sides accept the jury has real power; they disagree on whether that power has legalstatus as a right.",
-        3: "From the perspective of state lawyers and legal eagles, the jury’s role is limited. They say that jurors are expected to determine facts and apply the law, strictly as directed by the judge. According to this view, the idea of “jury nullification”, (which means jurors not following the judge's directions), is not recognised as a legal entitlement.",
-        4: "Civil liberties advocates and some constitutional historians argue the direct opposite. They accept jurors are instructed on the law, but argue the jury exists partly because law and justice are not always identical. According to this view, the jury acts as a democratic safeguard, ensuring that legal authority does not become detached from public conscience or community fairness.",
-        5: "Regardless of all this legal theory, the practical structure of the jury system is important. Jury deliberations are secret, and no external authority can interrogate how individual jurors reached their decisions. Jurors cannot be punished for their verdicts, and once an acquittal is returned it is final.",
+        2: "The central disagreement is not between lawyers and non-lawyers, but between two legal philosophies. One view treats the jury as bound strictly by judicial directions. The other sees the jury as a safeguard against unjust laws or unjust applications of law.",
+        3: "From the perspective of state lawyers and legal eagles, the jury’s role is limited. They say that jurors are expected to determine facts and apply the law, strictly as directed by the judge.",
+        4: "Civil liberties advocates and some constitutional historians argue the direct opposite. They accept jurors are instructed on the law, but argue the jury exists partly because law and justice are not always identical.",
+        5: "Regardless of all this legal theory, the practical structure of the jury system is important. Jury deliberations are secret, and no external authority can interrogate how individual jurors reached their decisions.",
         6: "This is the core of the issue. If jurors act independently, in secret, without punishment, and their final decision is irreversible, then the practical reality is that it's a legal right in all but name.",
         7: "This debate is not new. It has existed for three centuries within the common law tradition. Constitutional cases like Bushell’s Case in 1670 are often cited.",
         8: "The conclusion is, that this is not a legal answer, but a constitutional dilemma. One side prioritises legal certainty and judicial direction. The other prioritises conscience and democratic legitimacy."
@@ -197,17 +195,17 @@
         btn.textContent = "🔊 Speaking...";
         isSpeaking = true;
 
-        currentSentences = text.match(/[^.!?]+[.!?]+(?:\s|$)/g) || [text];
+        const sentences = text.match(/[^.!?]+[.!?]+(?:\s|$)/g) || [text];
         let index = 0;
 
         const speakNext = () => {
-            if (index >= currentSentences.length) {
+            if (index >= sentences.length) {
                 audioPlayed[currentSlide] = true;
                 btn.textContent = "🔊 Replay Audio";
                 isSpeaking = false;
                 return;
             }
-            const u = new SpeechSynthesisUtterance(currentSentences[index].trim());
+            const u = new SpeechSynthesisUtterance(sentences[index].trim());
             u.rate = 0.93;
             u.onend = () => { index++; speakNext(); };
             u.onerror = () => { isSpeaking = false; btn.textContent = "🔊 Play Audio"; };
@@ -245,8 +243,13 @@
         currentSlide = 1;
         isInQuiz = false;
         document.getElementById('completionScreen').style.display = 'none';
-        window.speechSynthesis.cancel();
         updateUI();
+    }
+
+    function restartQuiz() {
+        isInQuiz = true;
+        document.getElementById('completionScreen').style.display = 'none';
+        showQuiz();
     }
 
     // Quiz
