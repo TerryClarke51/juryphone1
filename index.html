@@ -136,8 +136,8 @@
         
         <div style="display:flex; align-items:center; gap:10px; flex:1; justify-content:center; flex-wrap:wrap;">
             <span id="slideNum" style="font-weight:600;">Slide 1 / 8</span>
-            <button id="audioBtn" class="btn btn-secondary" onclick="speakNotes()">🔊 Play Audio</button>
-            <button id="quizBtn" class="btn btn-quiz" style="display:none;" onclick="showQuiz()">📝 Quiz</button>
+            <button id="audioBtn" class="btn btn-secondary" onclick="toggleAudio()">🔊 Play Audio</button>
+            <button id="quizBtn" class="btn btn-quiz" style="display:none;" onclick="showQuiz()">Next</button>
         </div>
         
         <div style="display:flex; gap:8px;">
@@ -151,6 +151,7 @@
     let currentSlide = 1;
     const totalSlides = 8;
     let isInQuiz = false;
+    let isSpeaking = false;
 
     const speakerNotes = {
         1: "This presentation explores a long-running legal debate, that’s been going on for over 300 fuckin years, about the role of the jury in England and Wales. At its core is a disagreement about whether a jury’s ability to return a verdict based on conscience should be understood as a formal legal right, or merely an unwritten practical power, with strings attached within the system. The issue sits between law, morality, and constitutional history. As of now, theres no absolute on how this issue should be dealt with, and both sides are still arguing the toss.",
@@ -167,12 +168,24 @@
 
     function updateUI() {
         document.getElementById('slideNum').textContent = `Slide ${currentSlide} / ${totalSlides}`;
-        document.getElementById('prevBtn').style.visibility = (currentSlide === 1) ? 'hidden' : 'visible';
-        document.getElementById('quizBtn').style.display = (currentSlide === 8) ? 'inline-block' : 'none';
-        document.getElementById('restartBtn').style.display = (currentSlide === 8) ? 'inline-block' : 'none';
+        document.getElementById('prevBtn').style.visibility = (currentSlide === 1 && !isInQuiz) ? 'hidden' : 'visible';
+        document.getElementById('quizBtn').style.display = (currentSlide === 8 && !isInQuiz) ? 'inline-block' : 'none';
+        document.getElementById('restartBtn').style.display = (currentSlide === 8 && !isInQuiz) ? 'inline-block' : 'none';
+        document.getElementById('nextBtn').style.display = isInQuiz ? 'none' : 'inline-block';
         document.getElementById('nextBtn').textContent = (currentSlide === totalSlides) ? "Finish" : "Next";
 
         document.getElementById('slideImg').src = `Slide${currentSlide}.JPG`;
+    }
+
+    function toggleAudio() {
+        const btn = document.getElementById('audioBtn');
+        if (isSpeaking) {
+            window.speechSynthesis.cancel();
+            isSpeaking = false;
+            btn.textContent = "🔊 Play Audio";
+        } else {
+            speakNotes();
+        }
     }
 
     function speakNotes() {
@@ -181,8 +194,8 @@
         if (!text) return;
 
         window.speechSynthesis.cancel();
-        btn.disabled = true;
         btn.textContent = "🔊 Speaking...";
+        isSpeaking = true;
 
         const sentences = text.match(/[^.!?]+[.!?]+(?:\s|$)/g) || [text];
         let index = 0;
@@ -191,13 +204,13 @@
             if (index >= sentences.length) {
                 audioPlayed[currentSlide] = true;
                 btn.textContent = "🔊 Replay Audio";
-                btn.disabled = false;
+                isSpeaking = false;
                 return;
             }
             const u = new SpeechSynthesisUtterance(sentences[index].trim());
             u.rate = 0.93;
             u.onend = () => { index++; speakNext(); };
-            u.onerror = () => { btn.disabled = false; btn.textContent = "🔊 Play Audio"; };
+            u.onerror = () => { isSpeaking = false; btn.textContent = "🔊 Play Audio"; };
             window.speechSynthesis.speak(u);
         };
         speakNext();
@@ -328,6 +341,7 @@
         isInQuiz = false;
         document.getElementById('quizStage').style.display = 'none';
         document.getElementById('slideImg').style.display = 'block';
+        updateUI();
     }
 
     window.onload = updateUI;
