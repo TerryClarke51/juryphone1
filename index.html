@@ -126,7 +126,7 @@
             <div style="display:flex; flex-direction:column; gap:12px; width:100%; max-width:320px;">
                 <button class="btn btn-restart" onclick="restartPresentation()">↺ Restart Presentation</button>
                 <button class="btn btn-restart" onclick="restartQuiz()">Restart Quiz</button>
-                <button class="btn btn-primary" onclick="window.close()">Finish</button>
+                <button class="btn btn-primary" onclick="finishPresentation()">Finish</button>
             </div>
         </div>
     </div>
@@ -169,7 +169,8 @@
         document.getElementById('slideNum').textContent = `Slide ${currentSlide} / ${totalSlides}`;
         document.getElementById('prevBtn').style.visibility = (currentSlide === 1 && !isInQuiz) ? 'hidden' : 'visible';
         document.getElementById('quizBtn').style.display = (currentSlide === 8 && !isInQuiz) ? 'inline-block' : 'none';
-        document.getElementById('nextBtn').style.display = (isInQuiz || currentSlide === totalSlides) ? 'none' : 'inline-block';
+        document.getElementById('nextBtn').style.display = isInQuiz ? 'none' : 'inline-block';
+        document.getElementById('nextBtn').textContent = (currentSlide === totalSlides) ? "Finish" : "Next";
 
         document.getElementById('slideImg').src = `Slide${currentSlide}.JPG`;
     }
@@ -296,6 +297,7 @@
         });
 
         const submitBtn = document.createElement('button');
+        submitBtn.id = "submitQuizBtn";
         submitBtn.className = 'btn btn-primary';
         submitBtn.style.margin = '25px auto';
         submitBtn.style.display = 'block';
@@ -331,6 +333,13 @@
                 else if (isYes === quizAnswers[i]) btn.classList.add('wrong');
             });
         });
+
+        // Replace Submit button with Finish
+        const submitBtn = document.getElementById('submitQuizBtn');
+        if (submitBtn) {
+            submitBtn.textContent = "Finish";
+            submitBtn.onclick = showCompletion;
+        }
 
         const result = document.createElement('div');
         result.style.textAlign = 'center';
