@@ -127,7 +127,7 @@
             <h1 style="color:#1e3a8a; font-size:2.4rem;">🎉 Well Done!</h1>
             <p style="font-size:1.4rem; margin:20px 0;">You have successfully completed</p>
             <p style="font-size:1.3rem; font-weight:600;">Session 1: Law, Morality, and Conscience</p>
-            <p style="color:#666; margin-top:30px;">Thank you for participating</p>
+            <button class="btn btn-restart" onclick="restartPresentation()" style="margin-top:30px;">↺ Restart Presentation</button>
         </div>
     </div>
 
@@ -142,7 +142,6 @@
         
         <div style="display:flex; gap:8px;">
             <button id="nextBtn" class="btn btn-primary" onclick="changeSlide(1)">Next</button>
-            <button id="restartBtn" class="btn btn-restart" style="display:none;" onclick="restartPresentation()">↺ Restart</button>
         </div>
     </div>
 </div>
@@ -152,6 +151,8 @@
     const totalSlides = 8;
     let isInQuiz = false;
     let isSpeaking = false;
+    let currentUtteranceIndex = 0;
+    let currentSentences = [];
 
     const speakerNotes = {
         1: "This presentation explores a long-running legal debate, that’s been going on for over 300 fuckin years, about the role of the jury in England and Wales. At its core is a disagreement about whether a jury’s ability to return a verdict based on conscience should be understood as a formal legal right, or merely an unwritten practical power, with strings attached within the system. The issue sits between law, morality, and constitutional history. As of now, theres no absolute on how this issue should be dealt with, and both sides are still arguing the toss.",
@@ -170,7 +171,6 @@
         document.getElementById('slideNum').textContent = `Slide ${currentSlide} / ${totalSlides}`;
         document.getElementById('prevBtn').style.visibility = (currentSlide === 1 && !isInQuiz) ? 'hidden' : 'visible';
         document.getElementById('quizBtn').style.display = (currentSlide === 8 && !isInQuiz) ? 'inline-block' : 'none';
-        document.getElementById('restartBtn').style.display = (currentSlide === 8 && !isInQuiz) ? 'inline-block' : 'none';
         document.getElementById('nextBtn').style.display = isInQuiz ? 'none' : 'inline-block';
         document.getElementById('nextBtn').textContent = (currentSlide === totalSlides) ? "Finish" : "Next";
 
@@ -197,17 +197,17 @@
         btn.textContent = "🔊 Speaking...";
         isSpeaking = true;
 
-        const sentences = text.match(/[^.!?]+[.!?]+(?:\s|$)/g) || [text];
+        currentSentences = text.match(/[^.!?]+[.!?]+(?:\s|$)/g) || [text];
         let index = 0;
 
         const speakNext = () => {
-            if (index >= sentences.length) {
+            if (index >= currentSentences.length) {
                 audioPlayed[currentSlide] = true;
                 btn.textContent = "🔊 Replay Audio";
                 isSpeaking = false;
                 return;
             }
-            const u = new SpeechSynthesisUtterance(sentences[index].trim());
+            const u = new SpeechSynthesisUtterance(currentSentences[index].trim());
             u.rate = 0.93;
             u.onend = () => { index++; speakNext(); };
             u.onerror = () => { isSpeaking = false; btn.textContent = "🔊 Play Audio"; };
@@ -243,6 +243,7 @@
 
     function restartPresentation() {
         currentSlide = 1;
+        isInQuiz = false;
         document.getElementById('completionScreen').style.display = 'none';
         window.speechSynthesis.cancel();
         updateUI();
