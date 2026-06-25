@@ -137,7 +137,6 @@
         <div style="display:flex; align-items:center; gap:10px; flex:1; justify-content:center; flex-wrap:wrap;">
             <span id="slideNum" style="font-weight:600;">Slide 1 / 8</span>
             <button id="audioBtn" class="btn btn-secondary" onclick="toggleAudio()">🔊 Play Audio</button>
-            <button id="quizBtn" class="btn btn-quiz" style="display:none;" onclick="showQuiz()">Next</button>
         </div>
         
         <div style="display:flex; gap:8px;">
@@ -169,11 +168,10 @@
         document.getElementById('slideNum').textContent = `Slide ${currentSlide} / ${totalSlides}`;
         document.getElementById('prevBtn').style.visibility = (currentSlide === 1 && !isInQuiz) ? 'hidden' : 'visible';
         
-        // On Slide 8: Show purple Next button (to Quiz), hide the right-side Next button
-        const isLastSlide = currentSlide === totalSlides;
-        document.getElementById('quizBtn').style.display = (isLastSlide && !isInQuiz) ? 'inline-block' : 'none';
-        document.getElementById('nextBtn').style.display = (isInQuiz || isLastSlide) ? 'none' : 'inline-block';
-        
+        // Show Next button on ALL slides including Slide 8
+        document.getElementById('nextBtn').style.display = isInQuiz ? 'none' : 'inline-block';
+        document.getElementById('nextBtn').textContent = "Next";
+
         document.getElementById('slideImg').src = `Slide${currentSlide}.JPG`;
         updateAudioButton();
     }
@@ -231,6 +229,10 @@
     }
 
     function changeSlide(dir) {
+        if (currentSlide === totalSlides && dir === 1) {
+            showQuiz();
+            return;
+        }
         currentSlide = Math.max(1, Math.min(totalSlides, currentSlide + dir));
         window.speechSynthesis.cancel();
         updateUI();
