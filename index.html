@@ -173,6 +173,12 @@
         document.getElementById('nextBtn').textContent = (currentSlide === totalSlides) ? "Finish" : "Next";
 
         document.getElementById('slideImg').src = `Slide${currentSlide}.JPG`;
+        updateAudioButton();
+    }
+
+    function updateAudioButton() {
+        const btn = document.getElementById('audioBtn');
+        btn.textContent = audioPlayed[currentSlide] ? "🔊 Replay Audio" : "🔊 Play Audio";
     }
 
     function toggleAudio() {
@@ -256,7 +262,7 @@
         window.close();
     }
 
-    // Quiz
+    // Quiz (full)
     const quizQuestions = [
         { q: "1. Is 'jury nullification' officially recognised as a formal legal right?", correct: false },
         { q: "2. Do jury deliberations take place in secret?", correct: true },
