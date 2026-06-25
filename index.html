@@ -2,7 +2,145 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-wid<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Session 1: Law, Morality, and Conscience</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            margin: 0;
+            padding: 8px;
+            background: #f3f4f6;
+            min-height: 100dvh;
+        }
+        .app-container {
+            max-width: 960px;
+            margin: auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            overflow: hidden;
+            height: calc(100dvh - 16px);
+            display: flex;
+            flex-direction: column;
+        }
+        .slide-viewer {
+            flex: 1;
+            background: #111;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+        .slide-img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        .controls {
+            padding: 12px;
+            background: #f9fafb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .btn {
+            padding: 12px 24px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .btn-secondary { background: #059669; color: white; }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <div class="slide-viewer">
+        <img id="slideImg" class="slide-img" alt="Slide">
+    </div>
+
+    <div class="controls">
+        <button onclick="changeSlide(-1)" class="btn">Back</button>
+        <span id="slideNum" style="font-weight:600;">Slide 1 / 8</span>
+        <button id="audioBtn" class="btn btn-secondary" onclick="toggleAudio()">🔊 Play Audio</button>
+        <button onclick="changeSlide(1)" class="btn">Next</button>
+    </div>
+</div>
+
+<script>
+    let currentSlide = 1;
+    const totalSlides = 8;
+
+    const speakerNotes = {
+        1: "This presentation explores a long-running legal debate, that’s been going on for over 300 fuckin years, about the role of the jury in England and Wales. At its core is a disagreement about whether a jury’s ability to return a verdict based on conscience should be understood as a formal legal right, or merely an unwritten practical power, with strings attached within the system. The issue sits between law, morality, and constitutional history. As of now, theres no absolute on how this issue should be dealt with, and both sides are still arguing the toss.",
+        2: "The central disagreement is not between lawyers and non-lawyers, but between two legal philosophies. One view treats the jury as bound strictly by judicial directions. The other sees the jury as a safeguard against unjust laws or unjust applications of law.",
+        3: "From the perspective of state lawyers and legal eagles, the jury’s role is limited. They say that jurors are expected to determine facts and apply the law, strictly as directed by the judge.",
+        4: "Civil liberties advocates and some constitutional historians argue the direct opposite. They accept jurors are instructed on the law, but argue the jury exists partly because law and justice are not always identical.",
+        5: "Regardless of all this legal theory, the practical structure of the jury system is important. Jury deliberations are secret, and no external authority can interrogate how individual jurors reached their decisions.",
+        6: "This is the core of the issue. If jurors act independently, in secret, without punishment, and their final decision is irreversible, then the practical reality is that it's a legal right in all but name.",
+        7: "This debate is not new. It has existed for three centuries within the common law tradition. Constitutional cases like Bushell’s Case in 1670 are often cited.",
+        8: "The conclusion is, that this is not a legal answer, but a constitutional dilemma. One side prioritises legal certainty and judicial direction. The other prioritises conscience and democratic legitimacy."
+    };
+
+    let isSpeaking = false;
+
+    function updateUI() {
+        document.getElementById('slideNum').textContent = `Slide ${currentSlide} / ${totalSlides}`;
+        document.getElementById('slideImg').src = `Slide${currentSlide}.JPG`;
+    }
+
+    function toggleAudio() {
+        const btn = document.getElementById('audioBtn');
+        if (isSpeaking) {
+            window.speechSynthesis.cancel();
+            isSpeaking = false;
+            btn.textContent = "🔊 Play Audio";
+        } else {
+            speakNotes();
+        }
+    }
+
+    function speakNotes() {
+        const btn = document.getElementById('audioBtn');
+        const text = speakerNotes[currentSlide];
+        if (!text) return;
+
+        window.speechSynthesis.cancel();
+        btn.textContent = "🔊 Speaking...";
+        isSpeaking = true;
+
+        const sentences = text.match(/[^.!?]+[.!?]+(?:\s|$)/g) || [text];
+        let index = 0;
+
+        const speakNext = () => {
+            if (index >= sentences.length) {
+                btn.textContent = "🔊 Replay Audio";
+                isSpeaking = false;
+                return;
+            }
+            const u = new SpeechSynthesisUtterance(sentences[index].trim());
+            u.rate = 0.93;
+            u.onend = () => { index++; speakNext(); };
+            u.onerror = () => { isSpeaking = false; btn.textContent = "🔊 Play Audio"; };
+            window.speechSynthesis.speak(u);
+        };
+        speakNext();
+    }
+
+    function changeSlide(dir) {
+        currentSlide = Math.max(1, Math.min(totalSlides, currentSlide + dir));
+        window.speechSynthesis.cancel();
+        updateUI();
+    }
+
+    window.onload = updateUI;
+</script>
+</body>
+</html>th, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <title>Session 1: Law, Morality, and Conscience</title>
     <style>
