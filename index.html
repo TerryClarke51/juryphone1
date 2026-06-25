@@ -169,11 +169,11 @@
         document.getElementById('slideNum').textContent = `Slide ${currentSlide} / ${totalSlides}`;
         document.getElementById('prevBtn').style.visibility = (currentSlide === 1 && !isInQuiz) ? 'hidden' : 'visible';
         
-        // On Slide 8 show Next (to Quiz), not Finish
-        document.getElementById('quizBtn').style.display = (currentSlide === 8 && !isInQuiz) ? 'inline-block' : 'none';
-        document.getElementById('nextBtn').style.display = isInQuiz ? 'none' : 'inline-block';
-        document.getElementById('nextBtn').textContent = "Next";
-
+        // On Slide 8: Show purple Next button (to Quiz), hide the right-side Next button
+        const isLastSlide = currentSlide === totalSlides;
+        document.getElementById('quizBtn').style.display = (isLastSlide && !isInQuiz) ? 'inline-block' : 'none';
+        document.getElementById('nextBtn').style.display = (isInQuiz || isLastSlide) ? 'none' : 'inline-block';
+        
         document.getElementById('slideImg').src = `Slide${currentSlide}.JPG`;
         updateAudioButton();
     }
@@ -231,13 +231,16 @@
     }
 
     function changeSlide(dir) {
-        if (currentSlide === totalSlides && dir === 1) {
-            showQuiz();           // Go to Quiz instead of Finish
-            return;
-        }
         currentSlide = Math.max(1, Math.min(totalSlides, currentSlide + dir));
         window.speechSynthesis.cancel();
         updateUI();
+    }
+
+    function showQuiz() {
+        isInQuiz = true;
+        document.getElementById('slideImg').style.display = 'none';
+        document.getElementById('quizStage').style.display = 'block';
+        buildQuiz();
     }
 
     function showCompletion() {
@@ -264,7 +267,7 @@
         window.close();
     }
 
-    // Quiz functions (unchanged)
+    // Quiz
     const quizQuestions = [
         { q: "1. Is 'jury nullification' officially recognised as a formal legal right?", correct: false },
         { q: "2. Do jury deliberations take place in secret?", correct: true },
@@ -275,13 +278,6 @@
     ];
 
     let quizAnswers = [];
-
-    function showQuiz() {
-        isInQuiz = true;
-        document.getElementById('slideImg').style.display = 'none';
-        document.getElementById('quizStage').style.display = 'block';
-        buildQuiz();
-    }
 
     function buildQuiz() {
         quizAnswers = new Array(quizQuestions.length).fill(null);
@@ -335,6 +331,7 @@
 
         quizQuestions.forEach((q, i) => {
             if (quizAnswers[i] === q.correct) score++;
+
             const block = container.children[i];
             const buttons = block.querySelectorAll('.option-btn');
             buttons.forEach(btn => {
