@@ -106,7 +106,6 @@
 
         .btn-primary { background: var(--primary); color: white; }
         .btn-secondary { background: #059669; color: white; }
-        .btn-quiz { background: #7c3aed; color: white; }
         .btn-restart { background: #64748b; color: white; }
     </style>
 </head>
@@ -134,14 +133,11 @@
     <div class="controls">
         <button id="prevBtn" class="btn btn-primary" onclick="goBack()">Back</button>
         
-        <div style="display:flex; align-items:center; gap:10px; flex:1; justify-content:center; flex-wrap:wrap;">
-            <span id="slideNum" style="font-weight:600;">Slide 1 / 8</span>
+        <div style="display:flex; align-items:center; gap:10px; flex:1; justify-content:center;">
             <button id="audioBtn" class="btn btn-secondary" onclick="toggleAudio()">🔊 Play Audio</button>
         </div>
         
-        <div style="display:flex; gap:8px;">
-            <button id="nextBtn" class="btn btn-primary" onclick="changeSlide(1)">Next</button>
-        </div>
+        <button id="nextBtn" class="btn btn-primary" onclick="changeSlide(1)">Next</button>
     </div>
 </div>
 
@@ -168,10 +164,6 @@
         document.getElementById('slideNum').textContent = `Slide ${currentSlide} / ${totalSlides}`;
         document.getElementById('prevBtn').style.visibility = (currentSlide === 1 && !isInQuiz) ? 'hidden' : 'visible';
         
-        // Show Next button on ALL slides including Slide 8
-        document.getElementById('nextBtn').style.display = isInQuiz ? 'none' : 'inline-block';
-        document.getElementById('nextBtn').textContent = "Next";
-
         document.getElementById('slideImg').src = `Slide${currentSlide}.JPG`;
         updateAudioButton();
     }
@@ -358,7 +350,10 @@
         updateUI();
     }
 
-    window.onload = updateUI;
+    window.onload = () => {
+        document.getElementById('slideNum').textContent = `Slide ${currentSlide} / ${totalSlides}`; // Add slideNum span if needed
+        updateUI();
+    };
 </script>
 </body>
 </html>
