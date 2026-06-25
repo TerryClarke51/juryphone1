@@ -168,9 +168,11 @@
     function updateUI() {
         document.getElementById('slideNum').textContent = `Slide ${currentSlide} / ${totalSlides}`;
         document.getElementById('prevBtn').style.visibility = (currentSlide === 1 && !isInQuiz) ? 'hidden' : 'visible';
+        
+        // On Slide 8 show Next (to Quiz), not Finish
         document.getElementById('quizBtn').style.display = (currentSlide === 8 && !isInQuiz) ? 'inline-block' : 'none';
         document.getElementById('nextBtn').style.display = isInQuiz ? 'none' : 'inline-block';
-        document.getElementById('nextBtn').textContent = (currentSlide === totalSlides) ? "Finish" : "Next";
+        document.getElementById('nextBtn').textContent = "Next";
 
         document.getElementById('slideImg').src = `Slide${currentSlide}.JPG`;
         updateAudioButton();
@@ -186,7 +188,7 @@
         if (isSpeaking) {
             window.speechSynthesis.cancel();
             isSpeaking = false;
-            btn.textContent = "🔊 Play Audio";
+            updateAudioButton();
         } else {
             speakNotes();
         }
@@ -214,7 +216,7 @@
             const u = new SpeechSynthesisUtterance(sentences[index].trim());
             u.rate = 0.93;
             u.onend = () => { index++; speakNext(); };
-            u.onerror = () => { isSpeaking = false; btn.textContent = "🔊 Play Audio"; };
+            u.onerror = () => { isSpeaking = false; updateAudioButton(); };
             window.speechSynthesis.speak(u);
         };
         speakNext();
@@ -230,7 +232,7 @@
 
     function changeSlide(dir) {
         if (currentSlide === totalSlides && dir === 1) {
-            showCompletion();
+            showQuiz();           // Go to Quiz instead of Finish
             return;
         }
         currentSlide = Math.max(1, Math.min(totalSlides, currentSlide + dir));
@@ -262,7 +264,7 @@
         window.close();
     }
 
-    // Quiz (full)
+    // Quiz functions (unchanged)
     const quizQuestions = [
         { q: "1. Is 'jury nullification' officially recognised as a formal legal right?", correct: false },
         { q: "2. Do jury deliberations take place in secret?", correct: true },
@@ -333,7 +335,6 @@
 
         quizQuestions.forEach((q, i) => {
             if (quizAnswers[i] === q.correct) score++;
-
             const block = container.children[i];
             const buttons = block.querySelectorAll('.option-btn');
             buttons.forEach(btn => {
