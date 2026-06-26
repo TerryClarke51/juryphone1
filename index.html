@@ -106,8 +106,6 @@
 
         .btn-primary { background: var(--primary); color: white; }
         .btn-secondary { background: #059669; color: white; }
-        .btn-quiz { background: #7c3aed; color: white; }
-        .btn-restart { background: #64748b; color: white; }
     </style>
 </head>
 <body>
@@ -131,7 +129,7 @@
         </div>
     </div>
 
-    <div class="controls">
+    <div class="controls" id="mainControls">
         <button id="prevBtn" class="btn btn-primary" onclick="goBack()">Back</button>
         
         <div style="display:flex; align-items:center; gap:10px; flex:1; justify-content:center;">
@@ -212,19 +210,13 @@
     }
 
     function goBack() {
-        if (isInQuiz) {
-            exitQuiz();
-        } else {
-            changeSlide(-1);
-        }
+        if (isInQuiz) exitQuiz();
+        else changeSlide(-1);
     }
 
     function nextAction() {
-        if (currentSlide === totalSlides) {
-            showQuiz();
-        } else {
-            changeSlide(1);
-        }
+        if (currentSlide === totalSlides) showQuiz();
+        else changeSlide(1);
     }
 
     function changeSlide(dir) {
@@ -237,10 +229,19 @@
         isInQuiz = true;
         document.getElementById('slideImg').style.display = 'none';
         document.getElementById('quizStage').style.display = 'block';
+        document.getElementById('mainControls').style.display = 'none'; // Force hide
         buildQuiz();
     }
 
-    // Quiz and Completion functions (same as before)
+    function exitQuiz() {
+        isInQuiz = false;
+        document.getElementById('quizStage').style.display = 'none';
+        document.getElementById('slideImg').style.display = 'block';
+        document.getElementById('mainControls').style.display = 'flex';
+        updateUI();
+    }
+
+    // Quiz
     const quizQuestions = [
         { q: "1. Is 'jury nullification' officially recognised as a formal legal right?", correct: false },
         { q: "2. Do jury deliberations take place in secret?", correct: true },
@@ -279,7 +280,7 @@
 
         const submitBtn = document.createElement('button');
         submitBtn.className = 'btn btn-primary';
-        submitBtn.style.margin = '25px auto';
+        submitBtn.style.margin = '30px auto';
         submitBtn.style.display = 'block';
         submitBtn.textContent = 'Submit Quiz';
         submitBtn.onclick = submitQuiz;
@@ -316,23 +317,17 @@
 
         const result = document.createElement('div');
         result.style.textAlign = 'center';
-        result.style.margin = '25px 0';
-        result.style.fontSize = '1.4rem';
+        result.style.margin = '30px 0';
+        result.style.fontSize = '1.5rem';
         result.innerHTML = score === 6 ? '🎉 Perfect Score! Excellent work!' : `You scored ${score}/6`;
         container.appendChild(result);
-    }
-
-    function exitQuiz() {
-        isInQuiz = false;
-        document.getElementById('quizStage').style.display = 'none';
-        document.getElementById('slideImg').style.display = 'block';
-        updateUI();
     }
 
     function restartPresentation() {
         currentSlide = 1;
         isInQuiz = false;
         document.getElementById('completionScreen').style.display = 'none';
+        document.getElementById('mainControls').style.display = 'flex';
         updateUI();
     }
 
