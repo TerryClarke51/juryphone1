@@ -106,6 +106,7 @@
 
         .btn-primary { background: var(--primary); color: white; }
         .btn-secondary { background: #059669; color: white; }
+        .btn-restart { background: #64748b; color: white; }
     </style>
 </head>
 <body>
@@ -115,18 +116,20 @@
         
         <div id="quizStage" class="quiz-container">
             <div style="text-align:center; margin-bottom:15px; color:#666; font-size:0.9rem;">
-                <strong>Test Version 16</strong>
+                <strong>Test Version 17</strong>
             </div>
             <div class="quiz-title">Session 1 Quiz: Timing 2 Minutes</div>
             <div id="quizContent"></div>
         </div>
 
         <div id="completionScreen" class="completion-screen">
-            <h1 style="color:#1e3a8a; font-size:2.4rem;">🎉 Quiz Completed!</h1>
-            <p id="scoreDisplay" style="font-size:1.6rem; margin:25px 0; font-weight:600;"></p>
-            <div style="display:flex; flex-direction:column; gap:12px; width:100%; max-width:320px; margin-top:20px;">
+            <h1 id="completionTitle" style="font-size:2.4rem; margin-bottom:10px;"></h1>
+            <p id="scoreDisplay" style="font-size:1.8rem; margin:20px 0; font-weight:600;"></p>
+            <p id="completionMessage" style="font-size:1.3rem; max-width:80%; margin:20px 0;"></p>
+            
+            <div style="display:flex; flex-direction:column; gap:12px; width:100%; max-width:320px; margin-top:30px;">
                 <button class="btn btn-restart" onclick="restartPresentation()">↺ Restart Presentation</button>
-                <button class="btn btn-restart" onclick="restartQuiz()">Restart Quiz</button>
+                <button id="restartQuizBtn" class="btn btn-restart" onclick="restartQuiz()">Restart Quiz</button>
                 <button class="btn btn-primary" onclick="finishPresentation()">Finish</button>
             </div>
         </div>
@@ -149,7 +152,16 @@
     let isInQuiz = false;
     let isSpeaking = false;
 
-    const speakerNotes = { /* your full speaker notes here - same as previous */ };
+    const speakerNotes = {
+        1: "This presentation explores a long-running legal debate, that’s been going on for over 300 fuckin years, about the role of the jury in England and Wales. At its core is a disagreement about whether a jury’s ability to return a verdict based on conscience should be understood as a formal legal right, or merely an unwritten practical power, with strings attached within the system. The issue sits between law, morality, and constitutional history. As of now, theres no absolute on how this issue should be dealt with, and both sides are still arguing the toss.",
+        2: "The central disagreement is not between lawyers and non-lawyers, but between two legal philosophies. One view treats the jury as bound strictly by judicial directions. The other sees the jury as a safeguard against unjust laws or unjust applications of law.",
+        3: "From the perspective of state lawyers and legal eagles, the jury’s role is limited. They say that jurors are expected to determine facts and apply the law, strictly as directed by the judge.",
+        4: "Civil liberties advocates and some constitutional historians argue the direct opposite. They accept jurors are instructed on the law, but argue the jury exists partly because law and justice are not always identical.",
+        5: "Regardless of all this legal theory, the practical structure of the jury system is important. Jury deliberations are secret, and no external authority can interrogate how individual jurors reached their decisions.",
+        6: "This is the core of the issue. If jurors act independently, in secret, without punishment, and their final decision is irreversible, then the practical reality is that it's a legal right in all but name.",
+        7: "This debate is not new. It has existed for three centuries within the common law tradition. Constitutional cases like Bushell’s Case in 1670 are often cited.",
+        8: "The conclusion is, that this is not a legal answer, but a constitutional dilemma. One side prioritises legal certainty and judicial direction. The other prioritises conscience and democratic legitimacy."
+    };
 
     let audioPlayed = {};
 
@@ -223,7 +235,7 @@
         isInQuiz = true;
         document.getElementById('slideImg').style.display = 'none';
         document.getElementById('quizStage').style.display = 'block';
-        document.getElementById('mainControls').style.display = 'none'; // Force hide
+        document.getElementById('mainControls').style.display = 'none';
         buildQuiz();
     }
 
@@ -309,12 +321,27 @@
             });
         });
 
-        const result = document.createElement('div');
-        result.style.textAlign = 'center';
-        result.style.margin = '30px 0';
-        result.style.fontSize = '1.5rem';
-        result.innerHTML = score === 6 ? '🎉 Perfect Score! Excellent work!' : `You scored ${score}/6`;
-        container.appendChild(result);
+        showCompletionScreen(score);
+    }
+
+    function showCompletionScreen(score) {
+        isInQuiz = false;
+        document.getElementById('quizStage').style.display = 'none';
+        document.getElementById('mainControls').style.display = 'none';
+        const comp = document.getElementById('completionScreen');
+        comp.style.display = 'flex';
+
+        document.getElementById('scoreDisplay').textContent = `You scored ${score}/6`;
+
+        if (score === 6) {
+            document.getElementById('completionTitle').innerHTML = '🎉 Perfect Score!';
+            document.getElementById('completionMessage').innerHTML = 'Excellent work!<br>You answered every question correctly.';
+            document.getElementById('restartQuizBtn').style.display = 'none';
+        } else {
+            document.getElementById('completionTitle').innerHTML = 'Not Quite There Yet';
+            document.getElementById('completionMessage').innerHTML = 'Keep studying the material and try again.';
+            document.getElementById('restartQuizBtn').style.display = 'block';
+        }
     }
 
     function restartPresentation() {
