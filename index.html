@@ -116,7 +116,7 @@
         
         <div id="quizStage" class="quiz-container">
             <div style="text-align:center; margin-bottom:15px; color:#666; font-size:0.9rem;">
-                <strong>Test Version 17</strong>
+                <strong>Test Version 18</strong>
             </div>
             <div class="quiz-title">Session 1 Quiz: Timing 2 Minutes</div>
             <div id="quizContent"></div>
@@ -247,7 +247,6 @@
         updateUI();
     }
 
-    // Quiz
     const quizQuestions = [
         { q: "1. Is 'jury nullification' officially recognised as a formal legal right?", correct: false },
         { q: "2. Do jury deliberations take place in secret?", correct: true },
@@ -355,6 +354,7 @@
     function restartQuiz() {
         isInQuiz = true;
         document.getElementById('completionScreen').style.display = 'none';
+        document.getElementById('mainControls').style.display = 'none';
         showQuiz();
     }
 
