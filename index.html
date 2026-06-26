@@ -45,6 +45,46 @@
             object-fit: contain;
         }
 
+        .quiz-container, .completion-screen {
+            position: absolute;
+            inset: 0;
+            background: #e2f0d9;
+            padding: 20px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .completion-screen {
+            background: linear-gradient(135deg, #e0f2fe, #f0fdf4);
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .question-block {
+            background: white;
+            padding: 18px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+
+        .option-btn {
+            display: inline-block;
+            width: 48%;
+            margin: 6px 1%;
+            padding: 14px;
+            text-align: center;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .option-btn.selected { border-color: #1e3a8a; background: #f0f9ff; }
+        .option-btn.correct { border-color: #10b981; background: #d1fae5; }
+        .option-btn.wrong { border-color: #ef4444; background: #fee2e2; }
+
         .controls {
             padding: 12px;
             background: #f9fafb;
@@ -66,12 +106,29 @@
 
         .btn-primary { background: var(--primary); color: white; }
         .btn-secondary { background: #059669; color: white; }
+        .btn-quiz { background: #7c3aed; color: white; }
+        .btn-restart { background: #64748b; color: white; }
     </style>
 </head>
 <body>
 <div class="app-container">
     <div class="slide-viewer">
         <img id="slideImg" class="slide-img" alt="Slide">
+        
+        <div id="quizStage" class="quiz-container">
+            <div class="quiz-title">Session 1 Quiz: Timing 2 Minutes</div>
+            <div id="quizContent"></div>
+        </div>
+
+        <div id="completionScreen" class="completion-screen">
+            <h1 style="color:#1e3a8a; font-size:2.4rem;">🎉 Quiz Completed!</h1>
+            <p id="scoreDisplay" style="font-size:1.6rem; margin:25px 0; font-weight:600;"></p>
+            <div style="display:flex; flex-direction:column; gap:12px; width:100%; max-width:320px; margin-top:20px;">
+                <button class="btn btn-restart" onclick="restartPresentation()">↺ Restart Presentation</button>
+                <button class="btn btn-restart" onclick="restartQuiz()">Restart Quiz</button>
+                <button class="btn btn-primary" onclick="finishPresentation()">Finish</button>
+            </div>
+        </div>
     </div>
 
     <div class="controls">
@@ -81,13 +138,14 @@
             <button id="audioBtn" class="btn btn-secondary" onclick="toggleAudio()">🔊 Play Audio</button>
         </div>
         
-        <button id="nextBtn" class="btn btn-primary" onclick="changeSlide(1)">Next</button>
+        <button id="nextBtn" class="btn btn-primary" onclick="nextAction()">Next</button>
     </div>
 </div>
 
 <script>
     let currentSlide = 1;
     const totalSlides = 8;
+    let isInQuiz = false;
     let isSpeaking = false;
 
     const speakerNotes = {
@@ -104,7 +162,7 @@
     let audioPlayed = {};
 
     function updateUI() {
-        document.getElementById('prevBtn').style.visibility = currentSlide === 1 ? 'hidden' : 'visible';
+        document.getElementById('prevBtn').style.visibility = (currentSlide === 1 && !isInQuiz) ? 'hidden' : 'visible';
         document.getElementById('slideImg').src = `Slide${currentSlide}.JPG`;
         updateAudioButton();
     }
@@ -154,13 +212,138 @@
     }
 
     function goBack() {
-        changeSlide(-1);
+        if (isInQuiz) {
+            exitQuiz();
+        } else {
+            changeSlide(-1);
+        }
+    }
+
+    function nextAction() {
+        if (currentSlide === totalSlides) {
+            showQuiz();
+        } else {
+            changeSlide(1);
+        }
     }
 
     function changeSlide(dir) {
         currentSlide = Math.max(1, Math.min(totalSlides, currentSlide + dir));
         window.speechSynthesis.cancel();
         updateUI();
+    }
+
+    function showQuiz() {
+        isInQuiz = true;
+        document.getElementById('slideImg').style.display = 'none';
+        document.getElementById('quizStage').style.display = 'block';
+        buildQuiz();
+    }
+
+    // Quiz and Completion functions (same as before)
+    const quizQuestions = [
+        { q: "1. Is 'jury nullification' officially recognised as a formal legal right?", correct: false },
+        { q: "2. Do jury deliberations take place in secret?", correct: true },
+        { q: "3. Can jurors be punished for their verdict?", correct: false },
+        { q: "4. Is this debate a recent development?", correct: false },
+        { q: "5. Does the jury act as a safeguard against unjust laws?", correct: true },
+        { q: "6. Has the law given a single clear answer on jury conscience?", correct: false }
+    ];
+
+    let quizAnswers = [];
+
+    function buildQuiz() {
+        quizAnswers = new Array(quizQuestions.length).fill(null);
+        const container = document.getElementById('quizContent');
+        container.innerHTML = '';
+
+        quizQuestions.forEach((q, i) => {
+            const block = document.createElement('div');
+            block.className = 'question-block';
+            block.innerHTML = `<div style="font-weight:600; margin-bottom:12px;">${q.q}</div>`;
+
+            const yesBtn = document.createElement('button');
+            yesBtn.className = 'option-btn';
+            yesBtn.textContent = 'Yes ✓';
+            yesBtn.onclick = () => selectAnswer(i, true, yesBtn, block);
+
+            const noBtn = document.createElement('button');
+            noBtn.className = 'option-btn';
+            noBtn.textContent = 'No ✕';
+            noBtn.onclick = () => selectAnswer(i, false, noBtn, block);
+
+            block.appendChild(yesBtn);
+            block.appendChild(noBtn);
+            container.appendChild(block);
+        });
+
+        const submitBtn = document.createElement('button');
+        submitBtn.className = 'btn btn-primary';
+        submitBtn.style.margin = '25px auto';
+        submitBtn.style.display = 'block';
+        submitBtn.textContent = 'Submit Quiz';
+        submitBtn.onclick = submitQuiz;
+        container.appendChild(submitBtn);
+    }
+
+    function selectAnswer(index, value, clickedBtn, block) {
+        quizAnswers[index] = value;
+        const buttons = block.querySelectorAll('.option-btn');
+        buttons.forEach(b => b.classList.remove('selected'));
+        clickedBtn.classList.add('selected');
+    }
+
+    function submitQuiz() {
+        if (quizAnswers.some(a => a === null)) {
+            alert("Please answer all questions before submitting.");
+            return;
+        }
+
+        let score = 0;
+        const container = document.getElementById('quizContent');
+
+        quizQuestions.forEach((q, i) => {
+            if (quizAnswers[i] === q.correct) score++;
+
+            const block = container.children[i];
+            const buttons = block.querySelectorAll('.option-btn');
+            buttons.forEach(btn => {
+                const isYes = btn.textContent.includes('Yes');
+                if (isYes === q.correct) btn.classList.add('correct');
+                else if (isYes === quizAnswers[i]) btn.classList.add('wrong');
+            });
+        });
+
+        const result = document.createElement('div');
+        result.style.textAlign = 'center';
+        result.style.margin = '25px 0';
+        result.style.fontSize = '1.4rem';
+        result.innerHTML = score === 6 ? '🎉 Perfect Score! Excellent work!' : `You scored ${score}/6`;
+        container.appendChild(result);
+    }
+
+    function exitQuiz() {
+        isInQuiz = false;
+        document.getElementById('quizStage').style.display = 'none';
+        document.getElementById('slideImg').style.display = 'block';
+        updateUI();
+    }
+
+    function restartPresentation() {
+        currentSlide = 1;
+        isInQuiz = false;
+        document.getElementById('completionScreen').style.display = 'none';
+        updateUI();
+    }
+
+    function restartQuiz() {
+        isInQuiz = true;
+        document.getElementById('completionScreen').style.display = 'none';
+        showQuiz();
+    }
+
+    function finishPresentation() {
+        window.close();
     }
 
     window.onload = updateUI;
