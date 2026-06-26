@@ -116,7 +116,7 @@
         
         <div id="quizStage" class="quiz-container">
             <div style="text-align:center; margin-bottom:15px; color:#666; font-size:0.9rem;">
-                <strong>Test Version 18</strong>
+                <strong>Test Version 19</strong>
             </div>
             <div class="quiz-title">Session 1 Quiz: Timing 2 Minutes</div>
             <div id="quizContent"></div>
@@ -167,6 +167,7 @@
 
     function updateUI() {
         document.getElementById('prevBtn').style.visibility = (currentSlide === 1 && !isInQuiz) ? 'hidden' : 'visible';
+        document.getElementById('slideImg').style.display = 'block';
         document.getElementById('slideImg').src = `Slide${currentSlide}.JPG`;
         updateAudioButton();
     }
@@ -355,6 +356,7 @@
         isInQuiz = true;
         document.getElementById('completionScreen').style.display = 'none';
         document.getElementById('mainControls').style.display = 'none';
+        document.getElementById('slideImg').style.display = 'none'; // Ensure image is hidden
         showQuiz();
     }
 
